@@ -18,15 +18,15 @@ const userSchema = mongoose.Schema({
         maxlength: [10, 'Your phone number can be max 10 digits in length.'],
         unique: true
     },
-    avatar: {
-        type: String,
-        required: [true, 'Please Enter Avatar']
-    },
     resumes: [
         {
             url: { type: String },
         }
     ],
+    maxResumes: {
+        type: Number,
+        default: 3
+    },
     dob: {
         type: Date,
         required: [true, 'Please Enter date'],
@@ -101,6 +101,10 @@ userSchema.methods.matchPassword = async function (password) {
     return await bcrypt.compare(password, this.password)
 }
 
+//Virtuals generate properties on runtime
+userSchema.virtual('fullName').get(function () {
+    return this.firstName + ' ' + this.lastName;
+});
 
 
 const User = mongoose.model('User', userSchema);

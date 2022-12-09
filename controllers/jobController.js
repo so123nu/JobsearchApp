@@ -49,15 +49,22 @@ const getJobs = asyncHandler(async (req, res) => {
         const searchLocation = req.query.location && req.query.location;
         const annualSalaryRange = req.query.annual_sal_range && req.query.annual_sal_range.split('-')
         const experienceRange = req.query.exp_range && req.query.exp_range.split('-')
+        const education = req.query.education && req.query.education.split('-')
+        const fundingType = req.query.funding_type && req.query.funding_type.split('-')
+        const companyStrength = req.query.company_strength && req.query.company_strength.split('-')
 
         const minAnnualSalary = annualSalaryRange && annualSalaryRange.length > 0 ? annualSalaryRange[0] : 0
-        const maxAnnualSalary = annualSalaryRange && annualSalaryRange.length > 0 ? annualSalaryRange[1] : 100000
+        const maxAnnualSalary = annualSalaryRange && annualSalaryRange.length > 0 ? annualSalaryRange[1] : 10000000
         const minExperience = experienceRange && experienceRange.length > 0 ? experienceRange[0] : 0
-        const maxExperience = experienceRange && experienceRange.length > 0 ? experienceRange[1] : 100000
+        const maxExperience = experienceRange && experienceRange.length > 0 ? experienceRange[1] : 10000000
+        const minCompanyStrength = companyStrength && companyStrength.length > 0 ? companyStrength[0] : 0
+        const maxCompanyStrength = companyStrength && companyStrength.length > 0 ? companyStrength[1] : 10000000
 
         //regex search i.e., like implementation
         const regex = new RegExp(search, 'i');
         const locationRegex = new RegExp(searchLocation, 'i');
+        const educationRegex = education.map(item => new RegExp(item, 'i'))
+        const fundingTypeRegex = fundingType.map(item => new RegExp(item, 'i'))
 
         const jobs = await Job.find({
             $or: [{ 'title': regex }, { 'company': regex }, { 'shortDescription': regex }],
@@ -66,6 +73,10 @@ const getJobs = asyncHandler(async (req, res) => {
             'annualSalary.range.max': { $lte: maxAnnualSalary },
             'experience.range.min': { $gte: minExperience },
             'experience.range.max': { $lte: maxExperience },
+            'employeeStrength.range.min': { $gte: minCompanyStrength },
+            'employeeStrength.range.max': { $lte: maxCompanyStrength },
+            'education': { $in: educationRegex },
+            'fundingType': { $in: fundingTypeRegex },
         })
             .populate('postedBy', ['firstName', 'lastName', 'status', 'currentPosition', 'currentCompany'])
             .limit(offset)

@@ -1,7 +1,8 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import { generateToken } from "../utils/helpers.js";
-
+import fs from 'fs';
+import path from 'path'
 
 //@desc Register User
 //@route POST /v1/api/users/register
@@ -88,9 +89,57 @@ const login = asyncHandler(async (req, res) => {
     }
 })
 
+//@desc Login User
+//@route POST /v1/api/users/resume/:id
+//@access public
+const deleteResume = asyncHandler(async (req, res) => {
+    try {
+
+        const user = await User.findById(req.user._id);
+
+        if (user) {
+            if (user.resumes && user.resumes.length > 0) {
+                const resumes = user.resumes.filter(resume => resume._id.toString() !== req.params.id.toString())
+
+                const deleteResume = user.resumes.find(resume => resume._id.toString() === req.params.id.toString())
+                const filename = path.basename(deleteResume.url);
+
+                user.resumes = resumes
+                user.save()
+
+                fs.unlink(`uploads/resumes/${filename}`, (err => {
+                    if (err) console.log(err);
+                    else {
+                        res.status(200).json({ success: true, message: "Resume deleted successfully" })
+                    }
+                }));
+
+                // fs.existsSync(`uploads/resumes/${filename}`, function (doesExist) {
+                //     console.log(doesExist)
+                //     if (doesExist) {
+                //         console.log('file exists');
+                //     } else {
+                //         res.status(404).json({ error: true, message: "File not Found" })
+                //     }
+                // });
+
+            }
+        } else {
+            res.status(404).json({ error: true, message: "User Not Found" })
+        }
+
+
+    } catch (err) {
+        if (err) {
+            res.status(400).json({ error: true, err })
+        }
+    }
+})
+
 
 export {
     registerUser,
     login,
+    deleteResume
 
 }

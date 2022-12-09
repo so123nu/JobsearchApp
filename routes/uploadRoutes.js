@@ -1,5 +1,4 @@
 import express from 'express';
-import { login, registerUser } from '../controllers/userController.js';
 import path from 'path';
 import multer from 'multer'
 import asyncHandler from 'express-async-handler';
@@ -13,6 +12,9 @@ const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         if (req.params.type == 'avatar') {
             cb(null, 'uploads/avatars')
+        }
+        if (req.params.type == 'resume') {
+            cb(null, 'uploads/resumes')
         }
     },
     filename: function (req, file, cb) {
@@ -39,7 +41,7 @@ const upload = multer({
 }).single('file')
 
 router.post('/users/:type', (req, res) => {
-    console.log(req.params)
+
     upload(req, res, function (err) {
         if (err) {
             res.status(400).json({ file: err.message })
@@ -47,7 +49,28 @@ router.post('/users/:type', (req, res) => {
             if (req.file == undefined) {
                 res.status(400).json({ file: "Please provide a file to proceed" })
             } else {
-                uploadDocument(req, res)
+                if (req.params.type == 'avatar') {
+                    uploadDocument(req, res)
+                }
+            }
+        }
+
+    })
+})
+
+router.post('/users/resumes/:type', protect, (req, res) => {
+    upload(req, res, function (err) {
+        if (err) {
+            res.status(400).json({ file: err.message })
+        } else {
+            if (req.file == undefined) {
+                res.status(400).json({ file: "Please provide a file to proceed" })
+            } else {
+                if (req.params.type == 'resume' && req.user.resumes && req.user.resumes.length < req.user.maxResumes) {
+                    uploadResume(req, res)
+                } else {
+                    res.status(400).json({ file: "Please delete a resume to add a new one" })
+                }
             }
         }
 
@@ -65,4 +88,17 @@ const uploadDocument = asyncHandler(async (req, res) => {
     res.status(201).json({ message: "File Uploaded Successfully!", data: filepath })
 })
 
+const uploadResume = asyncHandler(async (req, res) => {
+    let filepath = '';
+    const user = await User.findById(req.user._id);
+
+    if (req.params.type == 'resume') {
+        filepath = `/${req.file.path}`;
+    }
+
+    user.resumes.push({ url: filepath });
+    user.save();
+    res.status(201).json({ message: "Resume Uploaded Successfully!", data: user })
+
+})
 export default router;
