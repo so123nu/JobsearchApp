@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path'
 
 //@desc Register User
-//@route POST /v1/api/users/register
+//@route POST /v1/api/users
 //@access public
 const registerUser = asyncHandler(async (req, res) => {
     try {
@@ -89,9 +89,9 @@ const login = asyncHandler(async (req, res) => {
     }
 })
 
-//@desc Login User
+//@desc Delete Resume
 //@route POST /v1/api/users/resume/:id
-//@access public
+//@access private
 const deleteResume = asyncHandler(async (req, res) => {
     try {
 
@@ -136,10 +136,62 @@ const deleteResume = asyncHandler(async (req, res) => {
     }
 })
 
+//@desc Get user profile
+//@route GET /v1/api/users
+//@access private
+const getUserProfile = asyncHandler(async (req, res) => {
+    try {
+
+        // to get virtuals set toJSON: { getters: true } in schema 
+        const user = await User.findById(req.user._id);
+
+        if (user) {
+            res.status(404).json({ success: true, data: user })
+        } else {
+            res.status(404).json({ error: true, message: "User Profile Not Found" })
+        }
+
+
+    } catch (err) {
+        if (err) {
+            res.status(400).json({ error: true, err: err.message })
+        }
+    }
+})
+
+//@desc Get user profile
+//@route GET /v1/api/users/details
+//@access private
+const updateUserDetails = asyncHandler(async (req, res) => {
+    try {
+
+        let user = await User.findById(req.user._id)
+
+        if (user) {
+            user.firstName = req.body.firstName || user.firstName
+            user.lastName = req.body.lastName || user.lastName
+            user.dob = req.body.dob || user.dob
+            user.password = req.body.password || user.password
+            user.currentPosition = req.body.currentPosition || user.currentPosition
+            user.currentCompany = req.body.currentCompany || user.currentCompany
+
+            const updatedUser = await user.save()
+
+            res.status(200).json({ success: true, data: updatedUser })
+        } else {
+            res.status(404).json({ error: true, message: "User Profile Not Found" })
+        }
+
+    } catch (err) {
+        res.status(400).json({ error: true, err: err.message })
+    }
+})
 
 export {
     registerUser,
     login,
-    deleteResume
+    deleteResume,
+    getUserProfile,
+    updateUserDetails,
 
 }

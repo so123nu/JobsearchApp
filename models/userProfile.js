@@ -1,16 +1,17 @@
 import mongoose, { Model } from "mongoose";
 
 
-const userProfileSchema = new mongoose.Schema({
+const userProfileSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user'
+        ref: "User",
+        required: true
     },
     bio: {
-        type: String
+        type: String,
     },
     skills: {
-        type: [String]
+        type: [String],
     },
     maxSkills: {
         type: Number,
@@ -85,6 +86,6 @@ const userProfileSchema = new mongoose.Schema({
     timestamps: true
 })
 
-const UserProfile = mongoose.Model('UserProfile', userProfileSchema)
+const UserProfile = mongoose.model("UserProfile", userProfileSchema)
 
 export default UserProfile

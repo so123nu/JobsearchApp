@@ -4,6 +4,7 @@ import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import userProfileRoutes from './routes/userProfileRoutes.js';
 import path from 'path';
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
 app.use('/v1/api/users', userRoutes);
+app.use('/v1/api/users/profile', userProfileRoutes);
 app.use('/v1/api/jobs', jobRoutes);
 app.use('/v1/api/uploads', uploadRoutes);
 

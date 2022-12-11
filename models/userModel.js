@@ -85,6 +85,10 @@ const userSchema = mongoose.Schema({
         required: true,
         default: false
     },
+
+}, {
+    timestamps: true,
+    toJSON: { getters: true }
 })
 
 userSchema.pre('save', async function (next) {
@@ -104,7 +108,8 @@ userSchema.methods.matchPassword = async function (password) {
 //Virtuals generate properties on runtime
 userSchema.virtual('fullName').get(function () {
     return this.firstName + ' ' + this.lastName;
-});
+})
+
 
 
 const User = mongoose.model('User', userSchema);
