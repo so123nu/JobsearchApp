@@ -12,6 +12,12 @@ const userProfileSchema = mongoose.Schema({
     },
     skills: {
         type: [String],
+        validate: {
+            validator: function (v) {
+                return v.length <= 30
+            },
+            message: `You can choose maximum 30 skills.!`
+        },
     },
     maxSkills: {
         type: Number,
