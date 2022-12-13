@@ -26,16 +26,19 @@ const userProfileSchema = mongoose.Schema({
     education: [
         {
             university: {
-                type: String
+                type: String,
+                required: [true, 'Please enter university']
             },
             degree: {
-                type: String
+                type: String,
+                required: [true, 'Please enter degree']
             },
             specialization: {
                 type: String
             },
             from: {
-                type: Date
+                type: Date,
+                required: [true, 'Please enter start date']
             },
             to: {
                 type: Date
@@ -50,7 +53,8 @@ const userProfileSchema = mongoose.Schema({
     experience: [
         {
             company: {
-                type: String
+                type: String,
+                required: [true, 'Please Enter your company name']
             },
             designation: {
                 type: String,
